@@ -29,7 +29,7 @@ app.post('/generate', async (req, res) => {
       return res.status(400).json({ error: 'Property address is required' });
     }
 
-    if (!data.contractType) {
+    if (!data.type) {
       return res.status(400).json({ error: 'Contract type is required' });
     }
 
