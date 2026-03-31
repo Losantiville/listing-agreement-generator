@@ -1,0 +1,982 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Astonish — Listing Agreement Generator</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@400;600;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --pink:#E8007D;--pink-dk:#B5005F;--pink-lt:#FDE8F3;--pink-mid:#F9C6E1;
+  --cyan:#00AEEF;--cyan-dk:#0087BB;--cyan-lt:#E6F7FE;
+  --navy:#0A0F1E;
+  --ink:#1C2030;--ink2:#3D4558;--ink3:#6B7590;
+  --bg:#F2F5FA;--surf:#FFFFFF;--surf2:#F0F3FA;
+  --bdr:#DDE2EE;--bdr2:#C8CFE0;
+  --ok:#16A34A;--ok-lt:#DCFCE7;
+  --r:10px;--rs:6px;--rl:14px;
+  --sh-sm:0 1px 4px rgba(10,15,40,.07);
+  --sh:0 3px 14px rgba(10,15,40,.10);
+  --sh-lg:0 8px 36px rgba(10,15,40,.15);
+  --t:.22s cubic-bezier(.4,0,.2,1);
+  --f:'DM Sans',system-ui,sans-serif;
+  --fd:'Cormorant Garamond',Georgia,serif;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:var(--f);background:var(--bg);color:var(--ink);min-height:100vh;overflow-x:hidden;-webkit-font-smoothing:antialiased}
+
+.topbar{background:var(--surf);border-bottom:1px solid var(--bdr);height:60px;display:flex;align-items:center;justify-content:space-between;padding:0 1.75rem;position:sticky;top:0;z-index:300;box-shadow:var(--sh-sm)}
+.t-logo{display:flex;align-items:center;gap:10px}
+.t-mark{width:32px;height:32px;background:var(--pink);border-radius:7px;display:grid;place-items:center;flex-shrink:0}
+.t-mark span{font-family:var(--fd);font-weight:700;font-size:17px;color:#fff;line-height:1;margin-top:-1px}
+.t-words{display:flex;flex-direction:column;line-height:1}
+.t-name{font-family:var(--fd);font-weight:700;font-size:1.05rem;color:var(--navy);letter-spacing:.01em}
+.t-sub{font-size:.56rem;font-weight:500;color:var(--ink3);letter-spacing:.14em;text-transform:uppercase}
+.t-badge{background:var(--pink-lt);color:var(--pink-dk);font-size:.62rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;padding:4px 12px;border-radius:20px}
+.stripe{height:3px;background:linear-gradient(90deg,var(--pink) 0%,var(--cyan) 55%,transparent 100%)}
+.shell{display:flex;min-height:calc(100vh - 63px)}
+
+.sidebar{width:440px;flex-shrink:0;background:var(--surf);border-right:1px solid var(--bdr);height:calc(100vh - 63px);overflow-y:auto;position:sticky;top:63px}
+.sb-inner{padding:1.5rem 1.3rem 2.5rem}
+.sb-ey{font-size:.59rem;font-weight:600;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);margin-bottom:3px}
+.sb-h{font-family:var(--fd);font-weight:700;font-size:1.4rem;color:var(--navy);line-height:1.15}
+.sb-p{font-size:.77rem;color:var(--ink3);margin-top:4px;line-height:1.55}
+.hr{height:1px;background:var(--bdr);margin:1rem 0}
+
+.type-lbl{font-size:.66rem;font-weight:600;letter-spacing:.07em;text-transform:uppercase;color:var(--ink2);margin-bottom:.5rem}
+.tgrid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-bottom:1rem}
+.tbtn{background:var(--surf);border:1.5px solid var(--bdr);border-radius:var(--r);padding:10px 8px;cursor:pointer;text-align:center;transition:var(--t);display:flex;flex-direction:column;align-items:center;gap:4px}
+.tbtn:hover{border-color:var(--pink);background:var(--pink-lt)}
+.tbtn.on{border-color:var(--pink);background:var(--pink-lt);box-shadow:0 0 0 3px var(--pink-mid)}
+.tbtn .ti{font-size:1.2rem}
+.tbtn .tl{font-size:.68rem;font-weight:600;color:var(--ink2);line-height:1.25}
+.tbtn.on .tl{color:var(--pink-dk)}
+
+.acc{border:1px solid var(--bdr);border-radius:var(--r);overflow:hidden;margin-bottom:.7rem}
+.acc-h{background:var(--surf2);padding:9px 12px;display:flex;align-items:center;gap:7px;cursor:pointer;user-select:none;transition:background var(--t)}
+.acc-h:hover{background:#E5EAF5}
+.acc-dot{width:5px;height:5px;border-radius:50%;background:var(--pink);flex-shrink:0}
+.acc-t{font-size:.68rem;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--cyan-dk);flex:1}
+.acc-badge{font-size:.58rem;font-weight:600;background:var(--cyan-lt);color:var(--cyan-dk);padding:2px 7px;border-radius:10px}
+.acc-chev{color:var(--ink3);font-size:.7rem;transition:transform var(--t);flex-shrink:0}
+.acc.col .acc-chev{transform:rotate(-90deg)}
+.acc-body{padding:12px;display:flex;flex-direction:column;gap:8px;background:var(--surf)}
+.acc.col .acc-body{display:none}
+
+.acc[data-show]{display:none}
+.acc[data-show].vis{display:block}
+.f[data-show]{display:none}
+.f[data-show].vis{display:flex;flex-direction:column;gap:4px}
+
+.f{display:flex;flex-direction:column;gap:4px}
+.fr{display:grid;gap:7px}
+.fr2{grid-template-columns:1fr 1fr}
+.fr3{grid-template-columns:1fr 1fr 1fr}
+label{font-size:.63rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--ink3)}
+label.req::after{content:' *';color:var(--pink)}
+input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],select,textarea{
+  background:var(--bg);border:1.5px solid var(--bdr);border-radius:var(--rs);
+  color:var(--ink);font-family:var(--f);font-size:.84rem;padding:8px 10px;
+  width:100%;transition:var(--t);outline:none;-webkit-appearance:none}
+input:focus,select:focus,textarea:focus{border-color:var(--cyan);background:var(--cyan-lt);box-shadow:0 0 0 3px rgba(0,174,239,.11)}
+input::placeholder,textarea::placeholder{color:#B5BDD0}
+select{cursor:pointer}
+select option{background:#fff;color:var(--ink)}
+textarea{resize:vertical;min-height:64px;line-height:1.5}
+.prow{display:flex;align-items:center;gap:7px}
+.prow input{flex:1}
+.pu{font-size:.76rem;color:var(--ink3);white-space:nowrap;padding:8px 0;flex-shrink:0}
+
+.cg{display:flex;flex-direction:column;gap:5px}
+.ci{display:flex;align-items:center;gap:7px;cursor:pointer}
+.ci input[type=checkbox]{width:14px;height:14px;accent-color:var(--pink);cursor:pointer;flex-shrink:0;padding:0}
+.ci span{font-size:.8rem;color:var(--ink2)}
+.rg{display:flex;gap:14px;flex-wrap:wrap}
+.ri{display:flex;align-items:center;gap:5px;cursor:pointer}
+.ri input[type=radio]{accent-color:var(--pink);cursor:pointer}
+.ri span{font-size:.8rem;color:var(--ink2)}
+
+.fill-mode-row{display:flex;gap:6px}
+.fill-btn{flex:1;padding:7px 5px;border:1.5px solid var(--bdr);border-radius:var(--rs);background:var(--surf);cursor:pointer;font-family:var(--f);font-size:.71rem;font-weight:600;color:var(--ink3);transition:var(--t);text-align:center;line-height:1.3}
+.fill-btn:hover{border-color:var(--pink);background:var(--pink-lt);color:var(--pink-dk)}
+.fill-btn.on{border-color:var(--cyan);background:var(--cyan-lt);color:var(--cyan-dk)}
+.fill-note{background:var(--cyan-lt);border:1px solid rgba(0,174,239,.2);border-radius:var(--rs);padding:7px 10px;font-size:.72rem;color:var(--cyan-dk);line-height:1.5;display:none}
+.fill-note.vis{display:block}
+
+.note{background:var(--cyan-lt);border:1px solid rgba(0,174,239,.2);border-radius:var(--rs);padding:7px 10px;font-size:.72rem;color:var(--cyan-dk);line-height:1.5}
+
+/* Expense form table */
+.exp-tbl{width:100%;border-collapse:collapse;font-size:.71rem;margin-top:4px}
+.exp-tbl th{background:#EEF2FB;padding:5px 6px;font-weight:700;color:#444;border:1px solid var(--bdr);text-align:center;font-size:.6rem;text-transform:uppercase;letter-spacing:.04em;white-space:nowrap}
+.exp-tbl th:first-child{text-align:left;min-width:160px}
+.exp-tbl td{padding:3px 5px;border:1px solid var(--bdr);text-align:center;vertical-align:middle}
+.exp-tbl td:first-child{text-align:left;font-size:.72rem;color:var(--ink2);font-weight:500;background:var(--surf2)}
+.exp-tbl tr:nth-child(even) td{background:#F8FAFF}
+.exp-tbl tr:nth-child(even) td:first-child{background:#ECEEF5}
+.exp-tbl input[type=checkbox]{width:14px;height:14px;accent-color:var(--cyan);cursor:pointer;margin:0}
+.exp-tbl input[type=text]{background:var(--bg);border:1px solid var(--bdr);border-radius:3px;padding:3px 4px;font-size:.7rem;width:66px;color:var(--ink);font-family:var(--f);outline:none}
+.exp-tbl input[type=text]:focus{border-color:var(--cyan);background:var(--cyan-lt)}
+.btn-clear{margin-top:6px;padding:5px 12px;background:transparent;border:1px solid var(--bdr);border-radius:var(--rs);font-family:var(--f);font-size:.71rem;color:var(--ink3);cursor:pointer;transition:var(--t)}
+.btn-clear:hover{border-color:var(--bdr2);color:var(--ink2)}
+
+.btn-gen{width:100%;padding:13px;margin-top:.6rem;background:var(--pink);border:none;border-radius:var(--r);color:#fff;font-family:var(--f);font-size:.9rem;font-weight:600;cursor:pointer;letter-spacing:.03em;transition:var(--t);display:flex;align-items:center;justify-content:center;gap:7px;box-shadow:0 3px 12px rgba(232,0,125,.28)}
+.btn-gen:hover{background:var(--pink-dk);box-shadow:0 6px 20px rgba(232,0,125,.38);transform:translateY(-1px)}
+.btn-gen:active{transform:none}
+.btn-gen:disabled{opacity:.4;cursor:not-allowed;transform:none}
+.btn-rst{width:100%;padding:8px;margin-top:5px;background:transparent;border:1.5px solid var(--bdr);border-radius:var(--r);color:var(--ink3);font-family:var(--f);font-size:.78rem;font-weight:500;cursor:pointer;transition:var(--t)}
+.btn-rst:hover{border-color:var(--bdr2);color:var(--ink2)}
+
+.preview{flex:1;height:calc(100vh - 63px);overflow-y:auto;background:var(--bg)}
+.pv-inner{padding:1.75rem 2.25rem;max-width:820px;margin:0 auto}
+.empty{display:flex;flex-direction:column;align-items:center;justify-content:center;min-height:55vh;text-align:center;gap:12px;opacity:.5}
+.empty-icon{font-size:2.6rem}
+.empty-h{font-family:var(--fd);font-size:1.3rem;color:var(--navy)}
+.empty-p{font-size:.79rem;color:var(--ink3);max-width:290px;line-height:1.6}
+.pv-tb{display:flex;align-items:center;justify-content:space-between;margin-bottom:1.1rem;flex-wrap:wrap;gap:8px}
+.pv-ey{font-size:.58rem;letter-spacing:.18em;text-transform:uppercase;color:var(--pink);font-weight:600}
+.pv-h{font-family:var(--fd);font-size:1.2rem;font-weight:600;color:var(--navy)}
+.tb-btns{display:flex;gap:6px;flex-wrap:wrap}
+.ba{padding:8px 14px;border-radius:var(--rs);font-family:var(--f);font-size:.72rem;font-weight:600;cursor:pointer;letter-spacing:.04em;transition:var(--t);display:flex;align-items:center;gap:5px;white-space:nowrap}
+.ba-docx{background:var(--surf);border:1.5px solid var(--bdr);color:var(--ink2)}
+.ba-docx:hover{border-color:var(--bdr2);background:var(--surf2)}
+.ba-pdf{background:var(--navy);border:none;color:#fff}
+.ba-pdf:hover{background:#1a2340;transform:translateY(-1px)}
+.ba-print{background:var(--cyan);border:none;color:#fff;box-shadow:0 2px 8px rgba(0,174,239,.28)}
+.ba-print:hover{background:var(--cyan-dk);transform:translateY(-1px)}
+
+.doc{background:var(--surf);border-radius:var(--rl);box-shadow:var(--sh-lg);overflow:hidden;animation:fu .3s ease}
+@keyframes fu{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+.dh{background:var(--navy);padding:1.3rem 1.75rem;display:flex;align-items:flex-start;justify-content:space-between}
+.dh-logo-n{font-family:var(--fd);font-size:1.4rem;font-weight:700;color:#fff;letter-spacing:.02em}
+.dh-logo-s{font-size:.59rem;color:var(--pink-lt);letter-spacing:.13em;text-transform:uppercase;margin-top:2px}
+.dh-r{text-align:right}
+.dh-type{font-size:.58rem;color:rgba(0,174,239,.85);letter-spacing:.12em;text-transform:uppercase;font-weight:600}
+.dh-date{font-size:.68rem;color:rgba(255,255,255,.35);margin-top:2px}
+.d-stripe{height:3px;background:linear-gradient(90deg,var(--pink),var(--cyan))}
+.dtb{background:var(--pink);padding:.75rem 1.75rem}
+.dtb-t{font-family:var(--fd);font-size:1.25rem;font-weight:700;color:#fff}
+.dtb-s{font-size:.7rem;color:rgba(255,255,255,.8);margin-top:2px}
+.dbody{padding:0 1.75rem 1.75rem}
+.ds{margin-top:1.3rem}
+.ds-h{background:var(--cyan);color:#fff;font-size:.62rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;padding:5px 11px;border-radius:4px 4px 0 0}
+.ds-b{border:1.5px solid #DDE5F0;border-top:none;border-radius:0 0 4px 4px;overflow:hidden}
+.dtbl{width:100%;border-collapse:collapse}
+.dtbl td{padding:7px 10px;border-bottom:1px solid #EDF0F8;vertical-align:top;font-size:.78rem;line-height:1.5}
+.dtbl tr:last-child td{border-bottom:none}
+.dtbl .cl{font-weight:600;color:#4A5168;width:32%;background:#F6F8FC;font-size:.7rem;text-transform:uppercase;letter-spacing:.04em}
+.dtbl .cv{color:var(--ink)}
+.dtbl .cv em{color:#aaa}
+.dparties{display:grid;grid-template-columns:1fr 1fr;border:1.5px solid #DDE5F0;border-top:none;border-radius:0 0 4px 4px}
+.dparty{padding:12px}.dparty:first-child{border-right:1px solid #DDE5F0}
+.dp-lbl{font-size:.57rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;color:var(--cyan-dk);margin-bottom:7px}
+.dp-row{font-size:.75rem;color:var(--ink);margin-bottom:3px;line-height:1.4}
+.dp-row .lb{font-weight:600;color:var(--ink2)}
+.ls{margin-top:1rem}
+.ls-h{background:var(--navy);color:var(--pink-lt);font-size:.6rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;padding:5px 11px;border-radius:4px 4px 0 0}
+.ls-b{border:1.5px solid #DDE5F0;border-top:none;border-radius:0 0 4px 4px;padding:11px}
+.lt{font-size:.76rem;color:#252A3D;line-height:1.72}
+.lt p{margin-bottom:.55rem}.lt p:last-child{margin-bottom:0}
+.lt ol,.lt ul{padding-left:1.1rem;margin-bottom:.55rem}
+.lt li{margin-bottom:3px}
+.owner-blank{display:inline-block;border-bottom:1.5px solid var(--cyan);min-width:100px;color:var(--cyan-dk);font-style:italic;font-size:.78rem;background:var(--cyan-lt);padding:0 4px;border-radius:2px}
+.owner-chk{display:inline-block;background:var(--cyan-lt);border:1.5px solid var(--cyan);border-radius:3px;width:13px;height:13px;vertical-align:middle;margin:0 2px;position:relative;top:-1px}
+
+/* Preview expense table */
+.et{width:100%;border-collapse:collapse;font-size:.69rem}
+.et th{background:#EEF2FB;padding:5px 8px;text-align:center;font-weight:700;color:#333;border:1px solid #DDE3F0;font-size:.61rem;text-transform:uppercase;letter-spacing:.05em}
+.et th:first-child{text-align:left}
+.et td{padding:4px 8px;border:1px solid #E4E9F4;color:#333;text-align:center}
+.et td:first-child{text-align:left;font-weight:500}
+.et tr:nth-child(even) td{background:#F7F9FF}
+.et .chk-y{color:#16A34A;font-weight:700}
+
+.dsig{margin-top:1.5rem;border:1.5px solid #DDE5F0;border-radius:var(--r)}
+.dsig-h{background:var(--navy);padding:6px 13px;font-size:.62rem;font-weight:700;letter-spacing:.13em;text-transform:uppercase;color:rgba(0,174,239,.82)}
+.dsig-g{display:grid;grid-template-columns:1fr 1fr}
+.dsig-bl{padding:15px 15px 20px}.dsig-bl:first-child{border-right:1px solid #DDE5F0}
+.sig-pty{font-size:.6rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--pink);margin-bottom:11px}
+.sig-ln{border-bottom:1.5px solid #333;margin-bottom:11px;padding-bottom:2px;min-height:24px}
+.sig-lb{font-size:.6rem;color:#999;margin-top:2px}
+.sig-inf{font-size:.73rem;color:#333;margin-bottom:5px}
+.sig-inf .lb{font-weight:600;color:#555}
+.dftr{background:var(--navy);padding:.75rem 1.75rem;display:flex;align-items:center;justify-content:space-between}
+.dftr-logo{font-family:var(--fd);font-size:.9rem;font-weight:700;color:#fff}
+.dftr-c{font-size:.62rem;color:rgba(255,255,255,.35);text-align:right;line-height:1.6}
+.dftr-lic{font-size:.58rem;color:rgba(255,255,255,.2);text-align:center;padding-top:4px}
+
+.toast{position:fixed;bottom:1.5rem;right:1.5rem;z-index:500;background:var(--ok-lt);border:1.5px solid var(--ok);border-radius:var(--r);padding:10px 15px;font-size:.8rem;color:var(--ok);font-weight:500;box-shadow:var(--sh);display:none;align-items:center;gap:7px;max-width:320px}
+.toast.show{display:flex;animation:ti .3s ease}
+@keyframes ti{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.lov{position:fixed;inset:0;background:rgba(240,243,250,.88);backdrop-filter:blur(5px);z-index:400;display:none;flex-direction:column;align-items:center;justify-content:center;gap:12px}
+.lov.on{display:flex}
+.spin{width:38px;height:38px;border:3px solid var(--bdr);border-top-color:var(--pink);border-radius:50%;animation:sp .65s linear infinite}
+@keyframes sp{to{transform:rotate(360deg)}}
+.lov-msg{font-size:.85rem;color:var(--ink2);font-weight:500}
+
+@media print{
+  .sidebar,.topbar,.stripe,.pv-tb{display:none!important}
+  .preview{height:auto;overflow:visible}
+  .shell{display:block}
+  body{background:#fff}
+  .doc{box-shadow:none;border-radius:0}
+  @page{margin:1.5cm}
+}
+::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}
+::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
+::-webkit-scrollbar-thumb:hover{background:var(--ink3)}
+
+/* Google Places Autocomplete Styling */
+.pac-container{background-color:#fff;position:absolute;z-index:1000;border-radius:var(--rs);box-shadow:0 2px 6px rgba(0,0,0,0.1);border:1px solid var(--bdr);margin-top:0}
+.pac-item{padding:8px 12px;font-size:.84rem;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--bdr2)}
+.pac-item:last-child{border-bottom:none}
+.pac-item:hover{background-color:var(--cyan-lt)}
+.pac-item-selected{background-color:var(--cyan-lt)}
+.pac-item-selected .pac-item-query{color:var(--cyan-dk);font-weight:600}
+</style>
+<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"></script>
+</head>
+<body>
+
+<div class="lov" id="lov"><div class="spin"></div><div class="lov-msg" id="lovMsg">Building document…</div></div>
+<div class="toast" id="toast">✅ <span id="toastTxt"></span></div>
+
+<header class="topbar">
+  <div class="t-logo">
+    <div class="t-mark"><span>A</span></div>
+    <div class="t-words">
+      <span class="t-name">Astonish</span>
+      <span class="t-sub">Commercial Real Estate Services</span>
+    </div>
+  </div>
+  <div class="t-badge">Agreement Generator</div>
+</header>
+<div class="stripe"></div>
+
+<div class="shell">
+<aside class="sidebar">
+<div class="sb-inner">
+  <div style="margin-bottom:.9rem">
+    <div class="sb-ey">New Agreement</div>
+    <div class="sb-h">Configure &amp; Generate</div>
+    <div class="sb-p">Select a type, fill in the sections, then click Generate.</div>
+  </div>
+
+  <div class="type-lbl">Agreement Type <span style="color:var(--pink)">*</span></div>
+  <div class="tgrid">
+    <button type="button" class="tbtn" data-type="lease"      onclick="setType('lease')"><span class="ti">🏢</span><span class="tl">Right to Lease</span></button>
+    <button type="button" class="tbtn" data-type="sell"       onclick="setType('sell')"><span class="ti">💰</span><span class="tl">Right to Sell</span></button>
+    <button type="button" class="tbtn" data-type="sell_lease" onclick="setType('sell_lease')"><span class="ti">📋</span><span class="tl">Right to Sell &amp; Lease</span></button>
+    <button type="button" class="tbtn" data-type="auction"    onclick="setType('auction')"><span class="ti">🔨</span><span class="tl">Right to Sell (Auction)</span></button>
+  </div>
+  <div class="hr"></div>
+
+  <!-- All sections are OUTSIDE the form so buttons never accidentally submit -->
+
+  <!-- BROKER -->
+  <div class="acc" id="s-broker">
+    <div class="acc-h" onclick="tog('s-broker')"><div class="acc-dot"></div><div class="acc-t">Broker / Agent Information</div><div class="acc-badge">Pre-filled</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f"><label class="req" for="agentName">Agent Full Name</label><input type="text" id="agentName" value="Michael Bergman"></div>
+      <div class="f"><label for="agentTitle">Title / Role</label><input type="text" id="agentTitle" value="Broker"></div>
+      <div class="fr fr2">
+        <div class="f"><label for="agentPhone">Office Phone</label><input type="tel" id="agentPhone" value="513.334.3624"></div>
+        <div class="f"><label for="agentCell">Cell Phone</label><input type="tel" id="agentCell" value="513.334.3779"></div>
+      </div>
+      <div class="f"><label for="agentEmail">Email</label><input type="email" id="agentEmail" value="mbergman@astonishcommercial.com"></div>
+      <div class="f"><label for="agentLicense">License Number</label><input type="text" id="agentLicense" value="BRKM.2020007859"></div>
+      <div class="f"><label for="agentAddress">Office Address</label><input type="text" id="agentAddress" value="9918 Carver Rd., Suite 101"></div>
+      <div class="fr fr3">
+        <div class="f"><label for="agentCity">City</label><input type="text" id="agentCity" value="Cincinnati"></div>
+        <div class="f"><label for="agentState">State</label><input type="text" id="agentState" value="OH" maxlength="2"></div>
+        <div class="f"><label for="agentZip">Zip</label><input type="text" id="agentZip" value="45242"></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- OWNER -->
+  <div class="acc" id="s-owner">
+    <div class="acc-h" onclick="tog('s-owner')"><div class="acc-dot"></div><div class="acc-t" id="owner-acc-t">Owner / Lessor Information</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f"><label class="req" for="ownerName">Full Legal Name</label><input type="text" id="ownerName" placeholder="e.g. ABC Properties, LLC"></div>
+      <div class="f"><label for="ownerContact">Contact Person (if different)</label><input type="text" id="ownerContact" placeholder="Primary contact name"></div>
+      <div class="f"><label for="ownerAddress">Street Address</label><input type="text" id="ownerAddress" placeholder="123 Main St"></div>
+      <div class="fr fr3">
+        <div class="f"><label for="ownerCity">City</label><input type="text" id="ownerCity" placeholder="Cincinnati"></div>
+        <div class="f"><label for="ownerState">State</label><input type="text" id="ownerState" placeholder="OH" maxlength="2"></div>
+        <div class="f"><label for="ownerZip">Zip</label><input type="text" id="ownerZip" placeholder="45242"></div>
+      </div>
+      <div class="fr fr2">
+        <div class="f"><label for="ownerPhone">Office Phone</label><input type="tel" id="ownerPhone" placeholder="513-555-0100"></div>
+        <div class="f"><label for="ownerCell">Cell Phone</label><input type="tel" id="ownerCell" placeholder="513-555-0101"></div>
+      </div>
+      <div class="f"><label for="ownerEmail">Email</label><input type="email" id="ownerEmail" placeholder="owner@example.com"></div>
+    </div>
+  </div>
+
+  <!-- PROPERTY -->
+  <div class="acc" id="s-prop">
+    <div class="acc-h" onclick="tog('s-prop')"><div class="acc-dot"></div><div class="acc-t">Property Information</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f"><label class="req" for="propState">Property State</label>
+        <select id="propState">
+          <option value="">— Select State —</option>
+          <option value="OH">Ohio (OH)</option>
+          <option value="KY">Kentucky (KY)</option>
+        </select>
+      </div>
+      <div class="f"><label class="req" for="propAddr">Property Address</label><input type="text" id="propAddr" placeholder="1234 Commerce Dr"></div>
+      <div class="fr fr2">
+        <div class="f"><label for="propCity">City</label><input type="text" id="propCity" placeholder="Cincinnati"></div>
+        <div class="f"><label for="propZip">Zip</label><input type="text" id="propZip" placeholder="45242"></div>
+      </div>
+      <div class="f"><label for="propApn">APN / Parcel Number(s)</label><input type="text" id="propApn" placeholder="123-456-789"></div>
+      <div class="f" data-show="auction"><label for="prop2">Property 2 Address</label><input type="text" id="prop2" placeholder="Second property (if applicable)"></div>
+      <div class="f" data-show="auction"><label for="prop3">Property 3 Address</label><input type="text" id="prop3" placeholder="Third property (if applicable)"></div>
+    </div>
+  </div>
+
+  <!-- LISTING TERM -->
+  <div class="acc" id="s-term">
+    <div class="acc-h" onclick="tog('s-term')"><div class="acc-dot"></div><div class="acc-t">Listing Term</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="fr fr2">
+        <div class="f"><label class="req" for="tStart">Start Date</label><input type="date" id="tStart"></div>
+        <div class="f"><label class="req" for="tEnd">End Date</label><input type="date" id="tEnd"></div>
+      </div>
+      <div class="f" data-show="auction"><label for="auctionDate">Auction Agreement Execution Date</label><input type="date" id="auctionDate"></div>
+    </div>
+  </div>
+
+  <!-- SALE TERMS -->
+  <div class="acc" data-show="sell,sell_lease,auction" id="s-sale">
+    <div class="acc-h" onclick="tog('s-sale')"><div class="acc-dot"></div><div class="acc-t">Sale Terms</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f" id="listPrice-wrap"><label for="listPrice">Listing / Sale Price</label><input type="text" id="listPrice" placeholder="e.g. $1,250,000"></div>
+      <div class="f"><label for="saleComm">Sale Commission %</label>
+        <div class="prow"><input type="number" id="saleComm" placeholder="6" min="0" max="100" step="0.5"><span class="pu">% of gross sales price</span></div>
+      </div>
+      <div class="f" data-show="auction"><label for="res1">Hidden Reserve – Property 1</label><input type="text" id="res1" placeholder="$200,000"></div>
+      <div class="f" data-show="auction"><label for="res2">Hidden Reserve – Property 2</label><input type="text" id="res2" placeholder="$150,000"></div>
+      <div class="f" data-show="auction"><label for="res3">Hidden Reserve – Property 3</label><input type="text" id="res3" placeholder="$100,000"></div>
+      <div class="f" data-show="auction"><label for="termFee">Termination Fee %</label>
+        <div class="prow"><input type="number" id="termFee" value="3" min="0" max="20" step="0.5"><span class="pu">% of Reserve Price (min $20,000)</span></div>
+      </div>
+    </div>
+  </div>
+
+  <!-- LEASE TERMS -->
+  <div class="acc" data-show="lease,sell_lease" id="s-lease">
+    <div class="acc-h" onclick="tog('s-lease')"><div class="acc-dot"></div><div class="acc-t">Lease Terms</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f">
+        <label>Lease Term Fields — Filled By</label>
+        <div class="fill-mode-row">
+          <button type="button" class="fill-btn on" id="fb-agent" onclick="setFillMode('agent')">✏️ Fill now (agent)</button>
+          <button type="button" class="fill-btn"    id="fb-owner" onclick="setFillMode('owner')">📩 Owner fills when signing</button>
+        </div>
+        <div class="fill-note vis" id="fill-note-agent">Enter lease terms below — they will be pre-filled in the document.</div>
+        <div class="fill-note"     id="fill-note-owner">These fields will appear as blank lines for the owner to complete when signing.</div>
+      </div>
+      <div id="lease-fields">
+        <div class="fr fr2" style="margin-top:4px">
+          <div class="f"><label for="leaseType">Lease Type</label>
+            <select id="leaseType"><option value="">— Select —</option><option>NNN</option><option>Modified Gross</option><option>Full Service Gross</option><option>Industrial Gross</option><option>Other</option></select>
+          </div>
+          <div class="f"><label for="leaseTerm">Desired Term</label><input type="text" id="leaseTerm" placeholder="e.g. 3–5 years"></div>
+        </div>
+        <div class="f"><label for="baseRate">Base Lease Rate</label><input type="text" id="baseRate" placeholder="$12.00 / SF / year"></div>
+        <div class="f"><label for="nnn">NNN Expenses (est. annual)</label><input type="text" id="nnn" placeholder="$3.50 / SF / year"></div>
+        <div class="f"><label for="leaseComm">Lease Commission %</label>
+          <div class="prow"><input type="number" id="leaseComm" placeholder="5" min="0" max="100" step="0.5"><span class="pu">% of</span></div>
+        </div>
+        <div class="f"><label>Commission Basis</label>
+          <div class="rg">
+            <label class="ri"><input type="radio" name="commBasis" value="gross" checked><span>Gross Rent</span></label>
+            <label class="ri"><input type="radio" name="commBasis" value="net"><span>Net Rent</span></label>
+          </div>
+        </div>
+        <div class="f"><label for="renewComm">Renewal Commission %</label>
+          <div class="prow"><input type="number" id="renewComm" placeholder="3" min="0" max="100" step="0.5"><span class="pu">% of aggregate rent</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- EXPENSE ALLOCATION -->
+  <div class="acc" data-show="lease,sell_lease" id="s-expense">
+    <div class="acc-h" onclick="tog('s-expense')"><div class="acc-dot"></div><div class="acc-t">Expense Allocation</div><div class="acc-badge">Optional</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="note">Check who pays each expense. Leave any row blank — the document will show empty checkboxes that can be filled in at signing by either party.</div>
+      <div style="overflow-x:auto">
+        <table class="exp-tbl">
+          <thead>
+            <tr>
+              <th style="text-align:left">Expense Category</th>
+              <th>Landlord<br>Pays</th>
+              <th>Tenant<br>Pays</th>
+              <th>Tenant<br>Pro-Rata</th>
+              <th>Prior Yr<br>PSF ($)</th>
+            </tr>
+          </thead>
+          <tbody id="expTbody"></tbody>
+        </table>
+      </div>
+      <button type="button" class="btn-clear" onclick="clearExp()">↺ Clear All</button>
+    </div>
+  </div>
+
+  <!-- SIGNAGE -->
+  <div class="acc" id="s-sign">
+    <div class="acc-h" onclick="tog('s-sign')"><div class="acc-dot"></div><div class="acc-t">Signage Authorization</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="note">Select all sign types authorized by the owner.</div>
+      <div class="cg">
+        <label class="ci"><input type="checkbox" id="signBldg"><span>Building Sign(s)</span></label>
+        <label class="ci"><input type="checkbox" id="signAsph"><span>Asphalt / Rebar Spike Sign(s)</span></label>
+        <label class="ci"><input type="checkbox" id="signFnce"><span>Fence Sign(s)</span></label>
+        <label class="ci"><input type="checkbox" id="signWndw"><span>Window Sign(s)</span></label>
+        <label class="ci"><input type="checkbox" id="signYard" checked><span>Yard Sign(s)</span></label>
+      </div>
+    </div>
+  </div>
+
+  <!-- MARKETING REIMBURSEMENT -->
+  <div class="acc" id="s-mktg">
+    <div class="acc-h" onclick="tog('s-mktg')"><div class="acc-dot"></div><div class="acc-t">Marketing Reimbursement</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f"><label for="mktgReimb">Amount if terminated early</label><input type="text" id="mktgReimb" placeholder="e.g. $2,500"></div>
+    </div>
+  </div>
+
+  <!-- ADDITIONAL TERMS -->
+  <div class="acc" id="s-add">
+    <div class="acc-h" onclick="tog('s-add')"><div class="acc-dot"></div><div class="acc-t">Additional Terms</div><div class="acc-chev">▾</div></div>
+    <div class="acc-body">
+      <div class="f"><label for="addTerms">Special Conditions / Notes</label>
+        <textarea id="addTerms" rows="4" placeholder="Enter any special conditions, exclusions, or custom terms…"></textarea>
+      </div>
+    </div>
+  </div>
+
+  <div class="hr"></div>
+  <button type="button" class="btn-gen" id="btnGen" onclick="generate()" disabled>⚡ Generate Agreement</button>
+  <button type="button" class="btn-rst" onclick="resetAll()">↺ Reset Form</button>
+</div>
+</aside>
+
+<section class="preview" id="pvPanel">
+<div class="pv-inner">
+  <div class="empty" id="emptyState">
+    <div class="empty-icon">📄</div>
+    <div class="empty-h">Select an Agreement Type</div>
+    <div class="empty-p">Choose a listing type on the left, fill in the details, and click Generate.</div>
+  </div>
+  <div class="pv-tb" id="pvTb" style="display:none">
+    <div>
+      <div class="pv-ey">Document Preview</div>
+      <div class="pv-h" id="pvH">Listing Agreement</div>
+    </div>
+    <div class="tb-btns">
+      <button type="button" class="ba ba-docx"  onclick="dlDocx()">⬇ Word (.docx)</button>
+      <button type="button" class="ba ba-pdf"   onclick="dlPdf()">⬇ PDF</button>
+      <button type="button" class="ba ba-print" onclick="window.print()">🖨 Print</button>
+    </div>
+  </div>
+  <div id="docOut"></div>
+</div>
+</section>
+</div>
+
+<script>
+var CT = null;
+var LD = null;
+var fillMode = 'agent';
+
+var LABELS = {
+  lease:      'Exclusive Right to Lease',
+  sell:       'Exclusive Right to Sell',
+  sell_lease: 'Exclusive Right to Sell and Lease',
+  auction:    'Exclusive Right to Sell (Auction)'
+};
+
+var EXP_CATS = [
+  'Real Estate Taxes & Assessments','Common Area Maintenance','RE Tax & Insurance Increase',
+  'Insurance','Janitorial','Water','Sewer','Gas','Electrical','Garbage Removal',
+  'Heating','Air Conditioning','Interior Maintenance','Exterior Maintenance',
+  'Structure','Parking Lot','Landscape','Other'
+];
+
+/* ── Helpers ── */
+function g(id)  { var e=document.getElementById(id); return e ? e.value.trim() : ''; }
+function cb(id) { var e=document.getElementById(id); return e ? e.checked : false; }
+function rd(n)  { var e=document.querySelector('input[name="'+n+'"]:checked'); return e ? e.value : ''; }
+function fmtD(v){ if(!v) return ''; var d=new Date(v+'T00:00:00'); return d.toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'}); }
+
+function toast(msg) {
+  document.getElementById('toastTxt').textContent = msg;
+  var t = document.getElementById('toast');
+  t.classList.add('show');
+  setTimeout(function(){ t.classList.remove('show'); }, 4000);
+}
+
+function showLoad(msg) {
+  document.getElementById('lovMsg').textContent = msg || 'Building…';
+  document.getElementById('lov').classList.add('on');
+}
+
+function hideLoad() { document.getElementById('lov').classList.remove('on'); }
+
+/* ── Type selection ── */
+function setType(t) {
+  CT = t;
+  document.querySelectorAll('.tbtn').forEach(function(b){ b.classList.remove('on'); });
+  document.querySelector('.tbtn[data-type="'+t+'"]').classList.add('on');
+
+  document.querySelectorAll('[data-show]').forEach(function(el){
+    var types = el.getAttribute('data-show').split(',');
+    el.classList.toggle('vis', types.indexOf(t) !== -1);
+  });
+
+  document.getElementById('owner-acc-t').textContent = t === 'lease' ? 'Lessor Information' : 'Owner Information';
+
+  var lp = document.getElementById('listPrice-wrap');
+  if (lp) lp.style.display = t === 'auction' ? 'none' : '';
+
+  if (t === 'lease' || t === 'sell_lease') buildExpTable();
+
+  document.getElementById('btnGen').disabled = false;
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('pvTb').style.display = 'none';
+  document.getElementById('docOut').innerHTML = '';
+}
+
+/* ── Accordion ── */
+function tog(id) { document.getElementById(id).classList.toggle('col'); }
+
+/* ── Fill mode ── */
+function setFillMode(mode) {
+  fillMode = mode;
+  document.getElementById('fb-agent').classList.toggle('on', mode === 'agent');
+  document.getElementById('fb-owner').classList.toggle('on', mode === 'owner');
+  document.getElementById('fill-note-agent').classList.toggle('vis', mode === 'agent');
+  document.getElementById('fill-note-owner').classList.toggle('vis', mode === 'owner');
+  var fields = document.getElementById('lease-fields');
+  fields.style.opacity = mode === 'owner' ? '0.4' : '1';
+  fields.style.pointerEvents = mode === 'owner' ? 'none' : '';
+}
+
+/* ── Expense table ── */
+function buildExpTable() {
+  var tbody = document.getElementById('expTbody');
+  if (!tbody || tbody.children.length > 0) return;
+  tbody.innerHTML = EXP_CATS.map(function(cat, i) {
+    return '<tr><td>'+cat+'</td>'+
+      '<td><input type="checkbox" id="exp'+i+'_l"></td>'+
+      '<td><input type="checkbox" id="exp'+i+'_t"></td>'+
+      '<td><input type="checkbox" id="exp'+i+'_p"></td>'+
+      '<td><input type="text" id="exp'+i+'_psf" placeholder="0.00" style="width:60px"></td>'+
+      '</tr>';
+  }).join('');
+}
+
+function collectExp() {
+  return EXP_CATS.map(function(cat, i) {
+    var lEl = document.getElementById('exp'+i+'_l');
+    if (!lEl) return null;
+    return {
+      cat: cat,
+      landlord: lEl.checked,
+      tenant:   document.getElementById('exp'+i+'_t').checked,
+      prorata:  document.getElementById('exp'+i+'_p').checked,
+      psf:      document.getElementById('exp'+i+'_psf').value.trim()
+    };
+  }).filter(function(r){ return r !== null; });
+}
+
+function clearExp() {
+  EXP_CATS.forEach(function(_, i) {
+    ['l','t','p'].forEach(function(s){
+      var el = document.getElementById('exp'+i+'_'+s);
+      if (el) el.checked = false;
+    });
+    var psf = document.getElementById('exp'+i+'_psf');
+    if (psf) psf.value = '';
+  });
+}
+
+/* ── Collect all form data ── */
+function collect() {
+  return {
+    type:         CT,
+    fillMode:     fillMode,
+    agentName:    g('agentName'),    agentTitle:   g('agentTitle'),
+    agentPhone:   g('agentPhone'),   agentCell:    g('agentCell'),
+    agentEmail:   g('agentEmail'),   agentLicense: g('agentLicense'),
+    agentAddress: g('agentAddress'), agentCity:    g('agentCity'),
+    agentState:   g('agentState'),   agentZip:     g('agentZip'),
+    ownerName:    g('ownerName'),    ownerContact: g('ownerContact'),
+    ownerAddress: g('ownerAddress'), ownerCity:    g('ownerCity'),
+    ownerState:   g('ownerState'),   ownerZip:     g('ownerZip'),
+    ownerPhone:   g('ownerPhone'),   ownerCell:    g('ownerCell'),
+    ownerEmail:   g('ownerEmail'),
+    propAddr:     g('propAddr'),     propCity:     g('propCity'),
+    propState:    g('propState'),    propZip:      g('propZip'),
+    propApn:      g('propApn'),
+    prop2:        g('prop2'),        prop3:        g('prop3'),
+    tStart:       g('tStart'),       tEnd:         g('tEnd'),
+    auctionDate:  g('auctionDate'),
+    listPrice:    g('listPrice'),    saleComm:     g('saleComm'),
+    res1:         g('res1'),         res2:         g('res2'),
+    res3:         g('res3'),         termFee:      g('termFee'),
+    leaseType:    g('leaseType'),    leaseTerm:    g('leaseTerm'),
+    baseRate:     g('baseRate'),     nnn:          g('nnn'),
+    leaseComm:    g('leaseComm'),    commBasis:    rd('commBasis'),
+    renewComm:    g('renewComm'),
+    signBldg:     cb('signBldg'),    signAsph:     cb('signAsph'),
+    signFnce:     cb('signFnce'),    signWndw:     cb('signWndw'),
+    signYard:     cb('signYard'),
+    mktgReimb:    g('mktgReimb'),
+    addTerms:     g('addTerms'),
+    expenses:     collectExp()
+  };
+}
+
+/* ── Generate preview ── */
+function generate() {
+  if (!CT) return;
+  LD = collect();
+  renderDoc(LD);
+  document.getElementById('emptyState').style.display = 'none';
+  document.getElementById('pvTb').style.display = 'flex';
+  document.getElementById('pvH').textContent = LABELS[CT];
+  document.getElementById('pvPanel').scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ── Preview renderer ── */
+function blank(lbl) { return '<span class="owner-blank">&nbsp;'+(lbl||'&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;')+'&nbsp;</span>'; }
+function ochk() { return '<span class="owner-chk"></span>'; }
+
+function renderDoc(d) {
+  var t = d.type;
+  var isLease = t === 'lease' || t === 'sell_lease';
+  var isSell  = t === 'sell'  || t === 'sell_lease' || t === 'auction';
+  var today   = new Date().toLocaleDateString('en-US',{year:'numeric',month:'long',day:'numeric'});
+  var ownerLbl = t === 'lease' ? 'Lessor / Owner' : 'Owner';
+  var fm = d.fillMode === 'owner';
+
+  var propFull  = [d.propAddr,  [d.propCity,  d.propState,  d.propZip ].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  var ownerFull = [d.ownerAddress, [d.ownerCity, d.ownerState, d.ownerZip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  var agentFull = [d.agentAddress, [d.agentCity, d.agentState, d.agentZip].filter(Boolean).join(' ')].filter(Boolean).join(', ');
+  var signs = [d.signBldg&&'Building',d.signAsph&&'Asphalt/Rebar Spike',d.signFnce&&'Fence',d.signWndw&&'Window',d.signYard&&'Yard'].filter(Boolean);
+
+  var ltType = fm ? blank('Lease Type') : (d.leaseType || '<em>—</em>');
+  var ltTerm = fm ? blank('Desired Term') : (d.leaseTerm || '<em>—</em>');
+  var ltRate = fm ? blank('Base Rate') : (d.baseRate || '<em>—</em>');
+  var ltNNN  = fm ? blank('NNN Expenses') : (d.nnn || '<em>—</em>');
+
+  var lp  = fm ? blank('____%') : (d.leaseComm  ? '<strong>'+d.leaseComm+'%</strong>'  : blank('____%'));
+  var rp  = fm ? blank('____%') : (d.renewComm  ? '<strong>'+d.renewComm+'%</strong>'  : blank('____%'));
+  var sp  = d.saleComm ? '<strong>'+d.saleComm+'%</strong>' : blank('____%');
+  var bas = fm ? ochk()+' Gross &nbsp; '+ochk()+' Net' : '<strong>'+(d.commBasis==='net'?'net':'gross')+'</strong>';
+
+  /* Expense rows */
+  var expMap = {};
+  (d.expenses||[]).forEach(function(e){ if(e&&e.cat) expMap[e.cat]=e; });
+  var expRows = EXP_CATS.map(function(cat, i){
+    var row = expMap[cat] || {};
+    var shade = i%2===0 ? 'background:#F7F9FF' : '';
+    var chk = function(v){ return v ? '<span class="chk-y">✓</span>' : (fm ? ochk() : '☐'); };
+    return '<tr style="'+shade+'"><td style="text-align:left;font-weight:500">'+cat+'</td>'+
+      '<td style="text-align:center">'+chk(row.landlord)+'</td>'+
+      '<td style="text-align:center">'+chk(row.tenant)+'</td>'+
+      '<td style="text-align:center">'+chk(row.prorata)+'</td>'+
+      '<td style="text-align:center">'+(row.psf?'<strong>$'+row.psf+'</strong>':'')+'</td></tr>';
+  }).join('');
+
+  /* Commission text */
+  var commHtml = '';
+  if (t === 'auction') {
+    commHtml = '<p>Owner will pay Broker a commission of '+sp+' of the gross sales price excluding the buyer\'s premium. The commission is earned when Owner sells, exchanges, agrees to sell, or agrees to exchange all or part of the Property to anyone at any price on any terms, or when: (1) Broker procures a buyer ready, willing, and able to buy at the Hidden Reserve Price or any other price acceptable to Owner; (2) Owner grants an option to purchase; (3) Owner transfers interest in the Property; or (4) Owner breaches this listing.</p><p>Once earned, the commission is payable at the earlier of: (1) the closing and funding of any sale or exchange; (2) Owner\'s refusal to sell after Broker\'s Fee has been earned; (3) Owner\'s breach of this Listing; or (4) at such time as otherwise set forth in this Listing.</p>';
+  } else if (t === 'sell') {
+    commHtml = '<p>For a sale, Owner will pay Broker a commission of '+sp+' of the gross sales price, payable at closing from the sale proceeds. Owner agrees to sell the Property for the Listing Price or any other price acceptable to Owner. A commission shall be earned if Broker brings Seller an offer with terms acceptable to Seller.</p>';
+  } else {
+    commHtml = '<p>If the Owner leases the Property, in whole or in part, they agree to pay the Broker a commission of '+lp+' of the '+bas+' rent, payable upon lease execution and tenant\'s commencement of rent payments.</p>'+
+      '<p>The Broker is entitled to a commission under any of the following conditions:</p>'+
+      '<ol><li>The Broker sells or leases the Property, or finds a buyer or tenant, based on the terms of this Agreement or other mutually acceptable terms.</li>'+
+      '<li>The Owner sells or leases the Property directly or through another party during the term of this Agreement.</li>'+
+      '<li>The Owner sells or leases the Property within six (6) months after this Agreement expires to a person or entity introduced by the Broker.</li>'+
+      '<li>The Property becomes unrentable or unsellable due to the Owner\'s voluntary or negligent actions.</li>'+
+      '<li>The Owner breaches this Agreement or takes any action that prevents the Broker from leasing or selling the Property.</li></ol>'+
+      '<p>The Owner agrees to pay the Broker a commission of '+rp+' of the aggregate '+bas+' rent for any renewal, extension, holdover, or expansion of the lease, due at the beginning of each new term.</p>'+
+      (t === 'sell_lease' ? '<p>For a sale, Owner will pay Broker a commission of '+sp+' of the gross sales price.</p>' : '');
+  }
+
+  /* Protection period */
+  var protHtml = '';
+  if (t === 'sell') {
+    protHtml = '<p>A "Protection Period" is a period of one hundred eighty (180) days commencing on the day immediately following the expiration or termination of this Listing Agreement. No later than thirty (30) days after termination, the Broker must provide the Owner with a written notice containing the names of all individuals or entities to whom the Broker introduced the Property. If the Owner transfers all or any part of the Property to any individual or entity named in the Broker\'s notice during the Protection Period, the Owner shall pay the Broker the commission that would have been due. This clause shall survive termination of this Agreement.</p>';
+  } else if (t === 'auction') {
+    protHtml = '<p>"Protection Period" means that time starting the day after the Term ends and ending on the last to occur of: a) six (6) months after the Term ends, or b) any protection period delineated in Third Party Auction Platform agreements. All individuals and related entities that have executed the Confidentiality Agreement for the auction shall be automatically included in the protected list. If Owner agrees to sell or has substantive negotiations during the Protection Period with a person named in the notice or a related entity, Owner will pay Broker the amount Broker would have been entitled to receive. This Section survives termination of this Agreement.</p>';
+  } else {
+    protHtml = '<p>A "Protection Period" is a six-month period commencing on the day immediately following the expiration or termination of this Listing Agreement. No later than thirty (30) days after termination, the Broker must provide the Owner with a written notice containing the names of all individuals or entities to whom the Broker introduced the Property. If the Owner transfers all or any part of the Property to any individual or entity named in the Broker\'s notice, or to a relative or business associate of such individual or entity, during the Protection Period, the Owner shall pay the Broker the commission that would have been due. This clause shall survive the termination or expiration of this Agreement.</p>';
+  }
+
+  var ownerRepA = t==='lease' ? 'Owner holds fee simple title to the Property or has legal authority to lease the Property and has the legal right to enter into this Agreement' :
+    t==='sell_lease' ? 'Owner holds fee simple title to the Property and has the legal right to lease/sell the Property' :
+    t==='auction'    ? 'Owner holds fee simple title to the Property and has the legal right to convey the Property' :
+    'Owner holds fee simple title to the Property and has the legal right to sell the Property';
+
+  var propInc = t==='lease' ?
+    'Broker is authorized to market the Property including all buildings, improvements, fixtures, easements, rights-of-way, leases, rents, security deposits, licenses, permits, transferable warranties, and personal property used in operations.' :
+    "Unless this Agreement specifies otherwise, the Broker is authorized to market the Property including: (a) all buildings, improvements, and fixtures; (b) all rights, privileges, and appurtenances; (c) the Owner's interest in any existing leases, rents, and security deposits; (d) all licenses, permits, and transferable warranties; and (e) all personal property used to operate the Property.";
+
+  document.getElementById('docOut').innerHTML =
+'<div class="doc">'+
+'<div class="dh"><div><div class="dh-logo-n">Astonish</div><div class="dh-logo-s">Commercial Real Estate Services</div></div><div class="dh-r"><div class="dh-type">Listing Agreement</div><div class="dh-date">Generated: '+today+'</div></div></div>'+
+'<div class="d-stripe"></div>'+
+'<div class="dtb"><div class="dtb-t">Listing Agreement — '+LABELS[t]+'</div><div class="dtb-s">Agreement is entered into on the date of last signature.</div></div>'+
+'<div class="dbody">'+
+
+'<div class="ds"><div class="ds-h">Parties</div><div class="dparties">'+
+  '<div class="dparty"><div class="dp-lbl">'+ownerLbl+'</div>'+
+    '<div class="dp-row"><span class="lb">Name:</span> '+(d.ownerName||'<em>Not provided</em>')+'</div>'+
+    (d.ownerContact?'<div class="dp-row"><span class="lb">Contact:</span> '+d.ownerContact+'</div>':'')+
+    (ownerFull?'<div class="dp-row"><span class="lb">Address:</span> '+ownerFull+'</div>':'')+
+    (d.ownerPhone?'<div class="dp-row"><span class="lb">Phone:</span> '+d.ownerPhone+'</div>':'')+
+    (d.ownerCell?'<div class="dp-row"><span class="lb">Cell:</span> '+d.ownerCell+'</div>':'')+
+    (d.ownerEmail?'<div class="dp-row"><span class="lb">Email:</span> '+d.ownerEmail+'</div>':'')+
+  '</div>'+
+  '<div class="dparty"><div class="dp-lbl">Brokerage Firm</div>'+
+    '<div class="dp-row"><span class="lb">Broker:</span> Astonish LLC</div>'+
+    '<div class="dp-row"><span class="lb">Agent:</span> '+(d.agentName||'Michael Bergman')+'</div>'+
+    '<div class="dp-row"><span class="lb">Title:</span> '+(d.agentTitle||'Broker')+'</div>'+
+    '<div class="dp-row"><span class="lb">Address:</span> '+(agentFull||'9918 Carver Rd., Suite 101, Cincinnati OH 45242')+'</div>'+
+    '<div class="dp-row"><span class="lb">Phone:</span> '+(d.agentPhone||'513.334.3624')+'</div>'+
+    (d.agentCell?'<div class="dp-row"><span class="lb">Cell:</span> '+d.agentCell+'</div>':'')+
+    '<div class="dp-row"><span class="lb">Email:</span> '+(d.agentEmail||'mbergman@astonishcommercial.com')+'</div>'+
+  '</div>'+
+'</div></div>'+
+
+'<div class="ds"><div class="ds-h">Property</div><div class="ds-b"><table class="dtbl">'+
+  '<tr><td class="cl">Property Address</td><td class="cv">'+(propFull||'<em>—</em>')+'</td></tr>'+
+  (d.propApn?'<tr><td class="cl">APN</td><td class="cv">'+d.propApn+'</td></tr>':'')+
+  (t==='auction'&&d.prop2?'<tr><td class="cl">Property 2</td><td class="cv">'+d.prop2+'</td></tr>':'')+
+  (t==='auction'&&d.prop3?'<tr><td class="cl">Property 3</td><td class="cv">'+d.prop3+'</td></tr>':'')+
+  '<tr><td class="cl">Property Includes</td><td class="cv" style="font-size:.72rem;color:#555">'+propInc+'</td></tr>'+
+'</table></div></div>'+
+
+'<div class="ds"><div class="ds-h">Listing Term</div><div class="ds-b"><table class="dtbl">'+
+  '<tr><td class="cl">Start Date</td><td class="cv">'+(fmtD(d.tStart)||'<em>—</em>')+'</td>'+
+  '<td class="cl">End Date</td><td class="cv">'+(fmtD(d.tEnd)||'<em>—</em>')+'</td></tr>'+
+  (t==='auction'?'<tr><td class="cl">Auction Agreement Date</td><td class="cv" colspan="3">'+(fmtD(d.auctionDate)||'<em>—</em>')+'</td></tr>':'')+
+'</table></div></div>'+
+
+(isSell?
+'<div class="ds"><div class="ds-h">Sale Terms</div><div class="ds-b"><table class="dtbl">'+
+  (t!=='auction'?'<tr><td class="cl">Listing Price</td><td class="cv">'+(d.listPrice||'<em>—</em>')+'</td></tr>':'')+
+  '<tr><td class="cl">Sale Commission</td><td class="cv">'+(d.saleComm?d.saleComm+'%':'<em>—</em>')+' of gross sales price'+(t==='auction'?" (excl. buyer's premium)":'')+'</td></tr>'+
+  (t==='auction'?
+    '<tr><td class="cl">Reserve – Prop 1</td><td class="cv">'+(d.res1||'<em>Hidden Reserve</em>')+'</td></tr>'+
+    (d.prop2?'<tr><td class="cl">Reserve – Prop 2</td><td class="cv">'+(d.res2||'<em>Hidden Reserve</em>')+'</td></tr>':'')+
+    (d.prop3?'<tr><td class="cl">Reserve – Prop 3</td><td class="cv">'+(d.res3||'<em>Hidden Reserve</em>')+'</td></tr>':'')+
+    '<tr><td class="cl">Termination Fee</td><td class="cv">Greater of '+(d.termFee||'3')+'% of Reserve Price or $20,000.00</td></tr>':'')+
+'</table></div></div>':'') +
+
+(isLease?
+'<div class="ds"><div class="ds-h">Lease Terms</div><div class="ds-b">'+
+  '<table class="dtbl">'+
+    '<tr><td class="cl">Lease Type</td><td class="cv">'+ltType+'</td><td class="cl">Desired Term</td><td class="cv">'+ltTerm+'</td></tr>'+
+    '<tr><td class="cl">Base Lease Rate</td><td class="cv">'+ltRate+'</td><td class="cl">NNN Expenses</td><td class="cv">'+ltNNN+'</td></tr>'+
+  '</table>'+
+  '<div style="margin-top:10px">'+
+    '<p style="font-size:.72rem;font-weight:600;color:#444;margin-bottom:6px">EXPENSE ALLOCATION <span style="font-weight:400;color:#888;font-size:.68rem">(blank rows may be completed at signing)</span></p>'+
+    '<table class="et"><thead><tr><th>Expense Category</th><th>Landlord Pays</th><th>Tenant Pays</th><th>Pro-Rata</th><th>Prior Yr PSF</th></tr></thead>'+
+    '<tbody>'+expRows+'</tbody></table>'+
+  '</div>'+
+'</div></div>':'') +
+
+'<div class="ds"><div class="ds-h">Commission</div><div class="ds-b"><div class="lt">'+commHtml+'</div></div></div>'+
+
+'<div class="ds"><div class="ds-h">Access &amp; Signage Authorization</div><div class="ds-b">'+
+  '<table class="dtbl"><tr><td class="cl">Access</td><td class="cv" style="font-size:.75rem">To help the Broker show and '+(t==='sell'||t==='auction'?'sell':'lease/sell')+' the Property, the Owner instructs the Broker and their associates to: access the Property at reasonable times; grant access to other brokers, inspectors, appraisers, lenders, engineers, surveyors, and repair personnel at reasonable times; and duplicate keys to make showings more convenient and efficient.</td></tr></table>'+
+  '<div style="padding:10px 12px;font-size:.75rem;line-height:1.7;color:var(--ink)">'+
+  '<p style="font-weight:600;margin-bottom:6px">Owner directs Broker to carry out one or more of the following authorized signage installations:</p>'+
+  (signs.length===0?'<p style="color:#999;font-style:italic">No signage authorized by Owner.</p>':'')+
+  (d.signBldg?'<p><strong>Building Sign(s):</strong> Broker and its contractor(s) have permission to attach the sign(s) to the building using materials selected by them. Owner understands that the work may include small holes that will be drilled into the building to hold the installation pins, and that when the sign(s) are uninstalled, those pins will be removed and the holes will be sealed with silicone.</p>':'')+
+  (d.signAsph?'<p><strong>Asphalt / Rebar Spike Sign(s):</strong> Broker and its contractor(s) have permission to attach the sign(s) to the asphalt lot using materials selected by them. Owner understands that the work may include 12 small holes (4 per post) that will be drilled into the asphalt to hold the rebar spikes, and when the sign(s) are uninstalled, those spikes will be removed and the holes can be filled with silicone upon Owner\'s request.</p>':'')+
+  (d.signFnce?'<p><strong>Fence Sign(s):</strong> Broker and its contractor(s) have permission to attach the sign(s) to the fence using materials they select. Owner understands this may result in wear/scratching/minor impact on the fence.</p>':'')+
+  (d.signWndw?'<p><strong>Window Sign(s):</strong> Broker and its contractor(s) have permission to attach the window sign(s) to the building using materials selected by them. Broker does not recommend window signs to be installed on windows that are tinted. If a window sign is installed, residue may be left from the sign, burning may occur in the tint, and/or ripping of tint may occur.</p>':'')+
+  (d.signYard?'<p><strong>Yard Sign(s):</strong> Broker and its contractor(s) have permission to install a yard sign.</p>':'')+
+  '</div>'+
+'</div></div>'+
+
+'<div class="ds"><div class="ds-h">Additional Terms &amp; Conditions</div><div class="ds-b">'+
+  '<div class="ls"><div class="ls-h">Protection Period</div><div class="ls-b"><div class="lt">'+protHtml+'</div></div></div>'+
+  '<div class="ls"><div class="ls-h">Owner Representations &amp; Warranties</div><div class="ls-b"><div class="lt"><p>Except as provided otherwise in this Listing, Owner represents and warrants that: (a) '+ownerRepA+'; (b) Owner is not bound by a listing agreement with another broker for the sale, exchange, or lease of the Property that is or will be in effect during the Term of this Agreement; (c) no person or entity has any right to purchase, lease, or acquire the Property by an option, right of refusal, or other agreement; (d) there are no delinquencies or defaults under any mortgage or other encumbrance on the Property; (e) the Property is not subject to the jurisdiction of any court; (f) Owner owns sufficient intellectual property rights in any materials which Owner provides to Broker related to the Property (for example, brochures, photographs, drawings, or articles) to permit Broker to reproduce and distribute the materials in marketing the Property or for other purposes related to this Agreement; and (g) Owner has reviewed this Agreement and all information relating to the Property which Owner provides to Broker is true and correct to the best of Owner\'s knowledge; and (h) the signers below all constitute all parties required to execute the lease and have full authority to execute this Agreement.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Indemnity</div><div class="ls-b"><div class="lt"><p>Owner recognizes that the Broker, cooperating broker and agents ("Brokers") involved in the lease/sale are relying on all information provided or supplied by Owner or Owner\'s sources and/or Tenant or Tenant\'s sources or Buyers, as applicable, in connection with the Property. Owner agrees to indemnify, defend and hold harmless the Brokers, their agents and employees, from any claims, demands, suits, liabilities, costs and expenses (including reasonable attorney\'s fees) arising out of any misrepresentation or concealment of facts by Owner or Owner\'s sources or Tenant/Buyer or Tenant\'s/Buyer\'s sources.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Default</div><div class="ls-b"><div class="lt"><p>If Owner breaches this Listing, Owner is in default and will be liable to Broker for the amount of Broker\'s fee specified in this Agreement and any other fees Broker is entitled to receive under this Listing along with all costs expended by Broker and its agents in connection with the listing including costs of marketing, advertising, signage, mileage and the like; Broker may also terminate this Listing and exercise any other remedy at law or in equity. If a rent/sale amount is not determinable in the event of an exchange or breach of this Listing, the Listing Price will be the rental in the lease or sale price, as applicable, for the purpose of calculating Broker\'s fee. Interest is calculated on amount due at 10% per annum or the highest legal rate, whichever is less.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Mediation</div><div class="ls-b"><div class="lt"><p>The parties agree to negotiate in good faith in an effort to resolve any dispute that may arise between the parties. If the dispute cannot be resolved by negotiation, the parties will submit the dispute to mediation. The parties to the dispute will choose a mutually acceptable mediator and will share the costs of mediation equally.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Attorney\'s Fees</div><div class="ls-b"><div class="lt"><p>If Owner or Broker is a prevailing party in any legal proceeding brought as a result of a dispute under this Agreement or any transaction related to or contemplated by this Agreement, such party may recover from the non-prevailing party all costs of such proceeding and reasonable attorney\'s fees.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Notices</div><div class="ls-b"><div class="lt"><p>Unless specifically stated otherwise in this Agreement, all notices, waivers, and demands required or permitted hereunder shall be in writing and delivered to the addresses first set forth above, by one of the following methods: (a) hand delivery, whereby delivery is deemed to have occurred at the time of delivery; (b) a nationally recognized overnight courier company, whereby delivery is deemed to have occurred on delivery; or (c) email provided that the transmission is completed no later than 4:00 p.m. Eastern Time and a confirmation is received, whereby delivery is deemed to have occurred on the day on which electronic transmission is completed.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Counterparts</div><div class="ls-b"><div class="lt"><p>This Agreement may be executed by the Parties in separate counterparts, each of which when so executed and delivered shall be an original for all purposes, but all such counterparts shall together constitute but one and the same instrument. A signed copy of this Agreement delivered by email shall be deemed to have the same legal effect as delivery of an original signed copy of this Agreement.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Severability / Sole Agreement</div><div class="ls-b"><div class="lt"><p>If any provision of this Agreement is determined to be unenforceable, the remaining terms and provisions shall not in any way be construed, impaired or invalidated. This constitutes the entire agreement between Owner and Broker. No oral or implied agreement or understanding shall cancel or vary the Agreement terms. Any amendments shall be made in writing, signed by both parties. This Agreement is binding upon the parties, their heirs, administrators, executors, successors, and assigns.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Dual Agency</div><div class="ls-b"><div class="lt"><p>Owner acknowledges receipt of any forms, disclosures, statistics, and policies, if any and if applicable as mandated by state law and (b) Broker may act as a dual agent by representing both Owner and Buyer/Tenant in a transaction contemplated by this Agreement only if both parties to the transaction consent after having been informed of the dual agency relationship. Broker shall not permit another salesperson or agent affiliated with Broker to represent another party in a transaction involving the Broker (whether as the exclusive agent for that party, a subagent or dual agent) without obtaining the written consent of both parties to the transaction. Should a dual agency relationship arise, Owner and Buyer/Tenant will be provided with a dual agency disclosure form describing the agent\'s duties and Owner\'s and Buyer/Tenant\'s options if they elect not to consent to the dual agency relationship.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Disclosure and Owner\'s Covenants</div><div class="ls-b"><div class="lt"><p>Owner specifically acknowledges and understands that if Owner knows, or acquires knowledge after the execution of this Listing Agreement, of facts, environmental or otherwise, adversely affecting or materially impairing the title, condition, compliance with applicable laws, value or desirability of the Property, whether such facts are readily observable or not, then Owner shall disclose such facts to Broker and Buyer/Tenant. If Owner knows of such facts, Owner shall set them forth by written document attached to this Agreement. Owner has fully reviewed this Agreement and the document(s) attached, if any, relating to the Property, and Owner represents, to the best of its knowledge, that such information is true and accurate. Owner\'s obligation to indemnify shall apply to any claim arising out of or resulting from the inaccuracy of information and from Owner\'s failure to disclose any facts, environmental or otherwise, adversely affecting or materially impairing the value or desirability of the Property.</p></div></div></div>'+
+  '<div class="ls"><div class="ls-h">Owner\'s Acknowledgments</div><div class="ls-b"><div class="lt"><p>a. Should there be any tax, fee or other cost required in regard to the payment due Broker, such tax, fee or other cost shall be paid by Owner.</p><p>b. Owner acknowledges that there are currently no other listing contracts to sell, exchange or lease the Property.</p><p>c. Owner acknowledges and agrees to comply with all applicable federal, state and local laws, regulations, codes, ordinances and administrative orders having jurisdiction over the parties, the Property or the subject matters of this Agreement, including, but not limited to, the 1964 Civil Rights Act and all amendments thereto, the Foreign Investment in Real Property Tax Act, the Comprehensive Environmental Response Compensation and Liability Act, and the Americans with Disabilities Act.</p><p>d. Broker is not an expert in legal matters or other areas such as finance, property inspection, environmental and the like. Owner should consult qualified professionals and resources including a lawyer. Should Broker provide referrals or recommend resources, Owner agrees that Broker neither warrants, guarantees, nor endorses those entities or persons.</p><p style="font-style:italic;color:#555;margin-top:8px">Questions regarding this Agreement, its Addendum, attachments and accompanying disclosure forms or with regard to obligations in any contract should be directed to Owner\'s lawyer.</p></div></div></div>'+
+  (d.mktgReimb?'<div class="ls"><div class="ls-h">Marketing Reimbursement</div><div class="ls-b"><div class="lt"><p>Owner will reimburse Brokerage for marketing in the amount of <strong>'+d.mktgReimb+'</strong> in the event of a termination by Owner prior to the end of the terms of the Agreement.</p></div></div></div>':'')+
+  (d.addTerms?'<div class="ls"><div class="ls-h">Additional Terms</div><div class="ls-b"><div class="lt"><p>'+d.addTerms.replace(/\n/g,'</p><p>')+'</p></div></div></div>':'')+
+'</div></div>'+
+
+'<div class="dsig"><div class="dsig-h">Signatures</div><div class="dsig-g">'+
+  '<div class="dsig-bl"><div class="sig-pty">'+ownerLbl+'</div>'+
+    (d.ownerName?'<div class="sig-inf"><span class="lb">Entity:</span> '+d.ownerName+'</div>':'')+
+    '<div class="sig-ln"></div><div class="sig-lb">Signature</div>'+
+    '<div class="sig-ln"></div><div class="sig-lb">Printed Name</div>'+
+    '<div class="sig-ln"></div><div class="sig-lb">Title</div>'+
+    '<div class="sig-ln"></div><div class="sig-lb">Date</div>'+
+  '</div>'+
+  '<div class="dsig-bl"><div class="sig-pty">Broker — Astonish LLC</div>'+
+    '<div class="sig-inf"><span class="lb">Company:</span> Astonish LLC DBA Astonish Commercial Real Estate Services</div>'+
+    '<div class="sig-ln"></div><div class="sig-lb">Signature</div>'+
+    '<div class="sig-inf" style="margin-top:5px"><span class="lb">Printed Name:</span> '+(d.agentName||'Michael Bergman')+'</div>'+
+    '<div class="sig-inf"><span class="lb">Title:</span> '+(d.agentTitle||'Broker')+'</div>'+
+    (d.agentLicense?'<div class="sig-inf"><span class="lb">License No.:</span> '+d.agentLicense+'</div>':'')+
+    '<div class="sig-ln" style="margin-top:9px"></div><div class="sig-lb">Date</div>'+
+  '</div>'+
+'</div></div>'+
+
+'</div>'+
+'<div class="dftr"><div class="dftr-logo">Astonish</div><div class="dftr-c">'+(agentFull||'9918 Carver Rd., Suite 101, Cincinnati OH 45242')+'<br>'+(d.agentPhone||'513.334.3624')+' &middot; '+(d.agentEmail||'mbergman@astonishcommercial.com')+'</div></div>'+
+'<div class="dftr-lic">Astonish LLC DBA Astonish Commercial Real Estate Services &middot; License No. '+(d.agentLicense||'BRKM.2020007859')+' &middot; Questions about this Agreement should be directed to Owner\'s lawyer.</div>'+
+'</div>';
+}
+
+/* ── Downloads ── */
+async function _download(format) {
+  if (!LD) { alert('Generate the agreement first.'); return; }
+  showLoad(format === 'pdf' ? 'Generating PDF…' : 'Building Word document…');
+  try {
+    var resp = await fetch('/generate?format='+format, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(LD)
+    });
+    if (!resp.ok) {
+      var body = await resp.text();
+      var msg = body;
+      try { var j = JSON.parse(body); msg = j.error || body;
+        if (resp.status === 503 && j.fallback === 'docx') {
+          hideLoad();
+          if (confirm('PDF generation is not available on this server.\n\n'+msg+'\n\nDownload as Word (.docx) instead?')) await _download('docx');
+          return;
+        }
+      } catch(e) {}
+      throw new Error(msg || 'Server error '+resp.status);
+    }
+    var blob = await resp.blob();
+    var url  = URL.createObjectURL(blob);
+    var a    = document.createElement('a');
+    var tSlug = {lease:'Lease',sell:'Sell',sell_lease:'Sell_and_Lease',auction:'Auction'}[LD.type]||LD.type;
+    var pSlug = (LD.propAddr||'Agreement').replace(/[^a-zA-Z0-9]/g,'_').slice(0,30).replace(/_+$/,'');
+    a.href = url;
+    a.download = 'Astonish_'+tSlug+'_'+pSlug+'.'+format;
+    a.click();
+    URL.revokeObjectURL(url);
+    toast(format.toUpperCase()+' downloaded successfully.');
+  } catch(e) {
+    console.error(e);
+    var hint = format === 'pdf' ? '\n\nTip: Install LibreOffice (libreoffice.org) or use Word download instead.' : '';
+    alert('Download failed: '+e.message+hint);
+  } finally { hideLoad(); }
+}
+function dlDocx() { _download('docx'); }
+function dlPdf()  { _download('pdf');  }
+
+/* ── Reset ── */
+function resetAll() {
+  if (!confirm('Reset all fields and start over?')) return;
+  /* Clear all text inputs, selects, textareas */
+  document.querySelectorAll('input[type=text],input[type=email],input[type=tel],input[type=number],input[type=date],select,textarea').forEach(function(el){ el.value = ''; });
+  document.querySelectorAll('input[type=checkbox]').forEach(function(el){ el.checked = false; });
+  document.querySelectorAll('input[type=radio]').forEach(function(el){ el.checked = false; });
+  document.querySelector('input[name="commBasis"][value="gross"]').checked = true;
+
+  /* Restore broker defaults */
+  document.getElementById('agentName').value    = 'Michael Bergman';
+  document.getElementById('agentTitle').value   = 'Broker';
+  document.getElementById('agentPhone').value   = '513.334.3624';
+  document.getElementById('agentCell').value    = '513.334.3779';
+  document.getElementById('agentEmail').value   = 'mbergman@astonishcommercial.com';
+  document.getElementById('agentLicense').value = 'BRKM.2020007859';
+  document.getElementById('agentAddress').value = '9918 Carver Rd., Suite 101';
+  document.getElementById('agentCity').value    = 'Cincinnati';
+  document.getElementById('agentState').value   = 'OH';
+  document.getElementById('agentZip').value     = '45242';
+  document.getElementById('signYard').checked   = true;
+
+  /* Reset state */
+  CT = null; LD = null;
+  fillMode = 'agent'; setFillMode('agent');
+  clearExp();
+
+  /* Clear expense table body so it rebuilds fresh next time */
+  document.getElementById('expTbody').innerHTML = '';
+
+  /* Reset UI */
+  document.querySelectorAll('.tbtn').forEach(function(b){ b.classList.remove('on'); });
+  document.querySelectorAll('[data-show]').forEach(function(el){ el.classList.remove('vis'); });
+  document.getElementById('btnGen').disabled = true;
+  document.getElementById('docOut').innerHTML = '';
+  document.getElementById('emptyState').style.display = 'flex';
+  document.getElementById('pvTb').style.display = 'none';
+  document.getElementById('lease-fields').style.opacity = '1';
+  document.getElementById('lease-fields').style.pointerEvents = '';
+}
+
+/* ── Google Places Autocomplete ── */
+function initAutocomplete() {
+  if (typeof google === 'undefined' || !google.maps) return;
+
+  var autocompleteFields = [
+    { inputId: 'propAddr', cityId: 'propCity', stateId: 'propState', zipId: 'propZip' },
+    { inputId: 'ownerAddress', cityId: 'ownerCity', stateId: 'ownerState', zipId: 'ownerZip' },
+    { inputId: 'agentAddress', cityId: 'agentCity', stateId: 'agentState', zipId: 'agentZip' }
+  ];
+
+  autocompleteFields.forEach(function(field) {
+    var inputElement = document.getElementById(field.inputId);
+    if (!inputElement) return;
+
+    var autocomplete = new google.maps.places.Autocomplete(inputElement, {
+      types: ['address'],
+      componentRestrictions: { country: 'us' }
+    });
+
+    autocomplete.addListener('place_changed', function() {
+      var place = autocomplete.getPlace();
+      if (!place.geometry) return;
+
+      var addressComponents = {};
+      place.address_components.forEach(function(comp) {
+        addressComponents[comp.types[0]] = comp.short_name;
+      });
+
+      document.getElementById(field.cityId).value = addressComponents.locality || '';
+      document.getElementById(field.stateId).value = addressComponents.administrative_area_level_1 || '';
+      document.getElementById(field.zipId).value = addressComponents.postal_code || '';
+    });
+  });
+}
+
+/* Initialize autocomplete when DOM is ready */
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initAutocomplete);
+} else {
+  initAutocomplete();
+}
+</script>
+</body>
+</html>
