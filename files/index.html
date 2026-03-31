@@ -227,16 +227,7 @@ textarea{resize:vertical;min-height:64px;line-height:1.5}
 ::-webkit-scrollbar{width:5px}::-webkit-scrollbar-track{background:transparent}
 ::-webkit-scrollbar-thumb{background:var(--bdr2);border-radius:3px}
 ::-webkit-scrollbar-thumb:hover{background:var(--ink3)}
-
-/* Google Places Autocomplete Styling */
-.pac-container{background-color:#fff;position:absolute;z-index:1000;border-radius:var(--rs);box-shadow:0 2px 6px rgba(0,0,0,0.1);border:1px solid var(--bdr);margin-top:0}
-.pac-item{padding:8px 12px;font-size:.84rem;color:var(--ink);cursor:pointer;border-bottom:1px solid var(--bdr2)}
-.pac-item:last-child{border-bottom:none}
-.pac-item:hover{background-color:var(--cyan-lt)}
-.pac-item-selected{background-color:var(--cyan-lt)}
-.pac-item-selected .pac-item-query{color:var(--cyan-dk);font-weight:600}
 </style>
-<script src="https://maps.googleapis.com/maps/api/js?key=YOUR_GOOGLE_API_KEY&libraries=places"></script>
 </head>
 <body>
 
@@ -934,48 +925,6 @@ function resetAll() {
   document.getElementById('pvTb').style.display = 'none';
   document.getElementById('lease-fields').style.opacity = '1';
   document.getElementById('lease-fields').style.pointerEvents = '';
-}
-
-/* ── Google Places Autocomplete ── */
-function initAutocomplete() {
-  if (typeof google === 'undefined' || !google.maps) return;
-
-  var autocompleteFields = [
-    { inputId: 'propAddr', cityId: 'propCity', stateId: 'propState', zipId: 'propZip' },
-    { inputId: 'ownerAddress', cityId: 'ownerCity', stateId: 'ownerState', zipId: 'ownerZip' },
-    { inputId: 'agentAddress', cityId: 'agentCity', stateId: 'agentState', zipId: 'agentZip' }
-  ];
-
-  autocompleteFields.forEach(function(field) {
-    var inputElement = document.getElementById(field.inputId);
-    if (!inputElement) return;
-
-    var autocomplete = new google.maps.places.Autocomplete(inputElement, {
-      types: ['address'],
-      componentRestrictions: { country: 'us' }
-    });
-
-    autocomplete.addListener('place_changed', function() {
-      var place = autocomplete.getPlace();
-      if (!place.geometry) return;
-
-      var addressComponents = {};
-      place.address_components.forEach(function(comp) {
-        addressComponents[comp.types[0]] = comp.short_name;
-      });
-
-      document.getElementById(field.cityId).value = addressComponents.locality || '';
-      document.getElementById(field.stateId).value = addressComponents.administrative_area_level_1 || '';
-      document.getElementById(field.zipId).value = addressComponents.postal_code || '';
-    });
-  });
-}
-
-/* Initialize autocomplete when DOM is ready */
-if (document.readyState === 'loading') {
-  document.addEventListener('DOMContentLoaded', initAutocomplete);
-} else {
-  initAutocomplete();
 }
 </script>
 </body>
