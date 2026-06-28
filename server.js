@@ -35,7 +35,7 @@ try {
 }
 
 // Password authentication setup
-const APP_PASSWORD = process.env.LISTING_APP_PASSWORD || 'astonish123';
+const APP_PASSWORD = process.env.LISTING_APP_PASSWORD || 'Carver9918';
 const sessions = {}; // In-memory session store (use database in production)
 
 // Middleware to check authentication
@@ -193,13 +193,13 @@ app.post('/api/logout', (req, res) => {
   res.json({ success: true });
 });
 
-// Get sections endpoint (no auth required for local use)
-app.get('/api/sections', (req, res) => {
+// Get sections endpoint (protected)
+app.get('/api/sections', authMiddleware, (req, res) => {
   res.json(sectionsData);
 });
 
-// Save sections endpoint (no auth required for local use)
-app.post('/api/sections', (req, res) => {
+// Save sections endpoint (protected)
+app.post('/api/sections', authMiddleware, (req, res) => {
   try {
     const updatedSections = req.body;
     fs.writeFileSync(sectionsPath, JSON.stringify(updatedSections, null, 2), 'utf8');
@@ -211,8 +211,8 @@ app.post('/api/sections', (req, res) => {
   }
 });
 
-// Upload sections to team sync folder
-app.post('/api/sync/upload', (req, res) => {
+// Upload sections to team sync folder (protected)
+app.post('/api/sync/upload', authMiddleware, (req, res) => {
   try {
     fs.writeFileSync(syncFilePath, JSON.stringify(sectionsData, null, 2), 'utf8');
     res.json({ success: true, message: 'Sections uploaded to team folder', timestamp: new Date().toISOString() });
@@ -222,8 +222,8 @@ app.post('/api/sync/upload', (req, res) => {
   }
 });
 
-// Download sections from team sync folder
-app.post('/api/sync/download', (req, res) => {
+// Download sections from team sync folder (protected)
+app.post('/api/sync/download', authMiddleware, (req, res) => {
   try {
     if (!fs.existsSync(syncFilePath)) {
       return res.status(404).json({ error: 'No shared sections found yet' });
@@ -242,8 +242,8 @@ app.post('/api/sync/download', (req, res) => {
   }
 });
 
-// Check sync status
-app.get('/api/sync/status', (req, res) => {
+// Check sync status (protected)
+app.get('/api/sync/status', authMiddleware, (req, res) => {
   try {
     let status = {
       syncFolderExists: fs.existsSync(syncFolderPath),
@@ -260,8 +260,8 @@ app.get('/api/sync/status', (req, res) => {
   }
 });
 
-// Generate document endpoint (no auth required for local use)
-app.post('/generate', async (req, res) => {
+// Generate document endpoint (protected)
+app.post('/generate', authMiddleware, async (req, res) => {
   try {
     const data = req.body;
     const format = req.query.format || 'docx'; // Default to docx
